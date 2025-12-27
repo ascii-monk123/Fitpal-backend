@@ -23,7 +23,8 @@ const workout_schema = z.object({
   exercises: z.array(workoutExZod).default([]),
 });
 
-//create a workout
+//function: create a workout
+//route: POST /api/v1/workouts/create
 const createWorkout = async (req, res) => {
   try {
     //parse the request body
@@ -31,7 +32,9 @@ const createWorkout = async (req, res) => {
 
     //if format not correct end
     if (!parsed.success)
-      return res.status(400).json({ message: "Invalid input", errors: parsed.error.flatten()});
+      return res
+        .status(400)
+        .json({ message: "Invalid input", errors: parsed.error.flatten() });
 
     const data = parsed.data;
     //create a new workout
@@ -39,7 +42,7 @@ const createWorkout = async (req, res) => {
 
     //check if created or not
     if (!workout)
-     return res
+      return res
         .status(409)
         .json({ message: "Couldn't create resource, please try again" });
 
@@ -50,4 +53,28 @@ const createWorkout = async (req, res) => {
   }
 };
 
-export { createWorkout };
+//function: get a workout by id
+//route: GET /api/v1/workouts/:id
+const getWorkout = async (req, res) => {
+  try {
+    //get the id
+    const id = req.params.id;
+
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(400).json({ message: "Invalid id" });
+    }
+
+    //get the workout
+    const workout = await Workout.findOne({ _id: id, user: req.user.sub });
+
+    if (!workout) {
+      return res.status(404).json({ message: "Workout not found" });
+    }
+
+    return res.status(200).json(workout);
+  } catch (err) {
+    console.log(err);
+    return res.status(500).json({ message: "Server error" });
+  }
+};
+export { createWorkout, getWorkout };
