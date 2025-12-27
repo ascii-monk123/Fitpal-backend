@@ -184,9 +184,32 @@ const updateWorkout = async (req, res) => {
   }
 };
 
-
 //delete workout
-const deleteWorkout = async(req, res)=>{
-  console.log('fired');
-}
-export { createWorkout, getWorkout, listWorkouts, updateWorkout };
+const deleteWorkout = async (req, res) => {
+  try {
+    //get id
+    const id = req.params.id;
+
+    //id verify
+    if (!id || !mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(400).json({ message: "Invalid id" });
+    }
+
+    //delete the workout
+    const workout = await Workout.findOneAndDelete({ _id: id, user: req.user.sub });
+
+    if (!workout) return res.status(404).json({ message: "Workout not found" });
+
+    return res.status(200).json({ ok: true });
+  } catch (err) {
+    console.log(err);
+    return res.status(500).json({ message: "Server error" });
+  }
+};
+export {
+  createWorkout,
+  getWorkout,
+  listWorkouts,
+  updateWorkout,
+  deleteWorkout,
+};
