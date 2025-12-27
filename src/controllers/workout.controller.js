@@ -1,6 +1,7 @@
 import mongoose from "mongoose";
 import { z } from "zod";
 import Workout from "../models/Workout.js";
+import Exercise from "../models/Exercise.js";
 
 //workout zod object
 const workoutExZod = z.object({
@@ -37,6 +38,24 @@ const createWorkout = async (req, res) => {
         .json({ message: "Invalid input", errors: parsed.error.flatten() });
 
     const data = parsed.data;
+
+    //check whether each id exists or not
+    const exIds = [
+      ...new Set(data.exercises.map(ex=>{
+        return ex._id;
+      }))
+    ];
+    //convert into ids format
+    const obIds = exIds.map(id=>new mongoose.Types.ObjectId(id));
+
+    //count how many total documents with these exercises
+    const count = await Exercise.countDocuments({
+      _id: {$in:obIds}
+    });
+
+    if(count != obIds.length){
+      return res.status(400).json({message: 'One or more exercises do not exist'});
+    }
     //create a new workout
     const workout = await Workout.create({ ...data, user: req.user.sub });
 
