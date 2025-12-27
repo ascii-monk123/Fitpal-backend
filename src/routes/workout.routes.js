@@ -1,6 +1,6 @@
 import {Router} from 'express';
 import requireAuth from '../middlware/auth.js';
-import { createWorkout, getWorkout, listWorkouts} from '../controllers/workout.controller.js';
+import { createWorkout, getWorkout, listWorkouts, updateWorkout, deleteWorkout} from '../controllers/workout.controller.js';
 
 //create the workout router
 const workout_router = Router();
@@ -13,12 +13,12 @@ workout_router.post("/create", requireAuth, createWorkout);
 workout_router.get("/", requireAuth, listWorkouts);
 
 //update workout
-workout_router.patch("/:id", requireAuth, ()=>{});
+workout_router.patch("/:id", requireAuth, updateWorkout);
 
 //get workout from id
 workout_router.get("/:id", requireAuth, getWorkout);
 
 //delete workout
-workout_router.delete("/:id", requireAuth, ()=>{});
+workout_router.delete("/:id", requireAuth, deleteWorkout);
 
 export default workout_router;

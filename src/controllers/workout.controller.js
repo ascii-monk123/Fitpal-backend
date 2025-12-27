@@ -1,4 +1,4 @@
-import mongoose from "mongoose";
+import mongoose, { mongo } from "mongoose";
 import { z } from "zod";
 import Workout from "../models/Workout.js";
 import Exercise from "../models/Exercise.js";
@@ -24,6 +24,29 @@ const workout_schema = z.object({
   exercises: z.array(workoutExZod).default([]),
 });
 
+//function to validate exercises
+const validateExercise = async (data, req, res) => {
+  //check whether each id exists or not
+  const exIds = [
+    ...new Set(
+      data.exercises.map((ex) => {
+        return ex.exerciseId;
+      })
+    ),
+  ];
+
+  //convert into ids format
+  const obIds = exIds.map((id) => new mongoose.Types.ObjectId(id));
+
+  //count how many total documents with these exercises
+  const count = await Exercise.countDocuments({
+    _id: { $in: obIds },
+  });
+  if (count != obIds.length) {
+    return false;
+  }
+  return true;
+};
 //function: create a workout
 //route: POST /api/v1/workouts/create
 const createWorkout = async (req, res) => {
@@ -38,28 +61,13 @@ const createWorkout = async (req, res) => {
         .json({ message: "Invalid input", errors: parsed.error.flatten() });
 
     const data = parsed.data;
-    
-    //check whether each id exists or not
-    const exIds = [
-      ...new Set(
-        data.exercises.map((ex) => {
-          return ex.exerciseId;
-        })
-      ),
-    ];
 
-    //convert into ids format
-    const obIds = exIds.map((id) => new mongoose.Types.ObjectId(id));
-
-    //count how many total documents with these exercises
-    const count = await Exercise.countDocuments({
-      _id: { $in: obIds },
-    });
-    if (count != obIds.length) {
+    const validated = await validateExercise(data, req, res);
+    if (!validated)
       return res
         .status(400)
         .json({ message: "One or more exercises do not exist" });
-    }
+
     //create a new workout
     const workout = await Workout.create({ ...data, user: req.user.sub });
 
@@ -107,8 +115,7 @@ const getWorkout = async (req, res) => {
 const listWorkouts = async (req, res) => {
   try {
     //first get the query params
-    const { q,page = "1",  limit = "10" } = req.query;
-
+    const { q, page = "1", limit = "10" } = req.query;
 
     //filter object
     const filter = new Object();
@@ -134,4 +141,52 @@ const listWorkouts = async (req, res) => {
     return res.status(500).json({ message: "Internal server error" });
   }
 };
-export { createWorkout, getWorkout, listWorkouts };
+
+//update workout
+const updateWorkout = async (req, res) => {
+  try {
+    //get the id
+    const id = req.params.id;
+
+    //validify id
+    if (!id || !mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(400).json({ message: "Invalid input" });
+    }
+
+    //validify the input
+    const parsed = workout_schema.partial().safeParse(req.body);
+
+    if (!parsed.success) {
+      return res.status(400).json({ message: "Invalid input" });
+    }
+    const data = parsed.data;
+    const validated = await validateExercise(data, req, res);
+    if (!validated)
+      return res
+        .status(400)
+        .json({ message: "One or more exercises do not exist" });
+    //update
+    const workout = await Workout.findOneAndUpdate(
+      { _id: id, user: req.user.sub },
+      data,
+      {
+        new: true,
+        runValidators: true,
+      }
+    );
+
+    if (!workout) return res.status(403).json({ message: "Forbidden" });
+
+    return res.status(200).json(workout);
+  } catch (err) {
+    console.log(err);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
+
+
+//delete workout
+const deleteWorkout = async(req, res)=>{
+  console.log('fired');
+}
+export { createWorkout, getWorkout, listWorkouts, updateWorkout };
