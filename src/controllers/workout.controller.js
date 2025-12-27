@@ -38,23 +38,27 @@ const createWorkout = async (req, res) => {
         .json({ message: "Invalid input", errors: parsed.error.flatten() });
 
     const data = parsed.data;
-
+    
     //check whether each id exists or not
     const exIds = [
-      ...new Set(data.exercises.map(ex=>{
-        return ex._id;
-      }))
+      ...new Set(
+        data.exercises.map((ex) => {
+          return ex.exerciseId;
+        })
+      ),
     ];
+
     //convert into ids format
-    const obIds = exIds.map(id=>new mongoose.Types.ObjectId(id));
+    const obIds = exIds.map((id) => new mongoose.Types.ObjectId(id));
 
     //count how many total documents with these exercises
     const count = await Exercise.countDocuments({
-      _id: {$in:obIds}
+      _id: { $in: obIds },
     });
-
-    if(count != obIds.length){
-      return res.status(400).json({message: 'One or more exercises do not exist'});
+    if (count != obIds.length) {
+      return res
+        .status(400)
+        .json({ message: "One or more exercises do not exist" });
     }
     //create a new workout
     const workout = await Workout.create({ ...data, user: req.user.sub });
@@ -96,4 +100,38 @@ const getWorkout = async (req, res) => {
     return res.status(500).json({ message: "Server error" });
   }
 };
-export { createWorkout, getWorkout };
+
+//function:get a list of users workouts
+// GET: /api/v1/workouts/
+
+const listWorkouts = async (req, res) => {
+  try {
+    //first get the query params
+    const { q,page = "1",  limit = "10" } = req.query;
+
+
+    //filter object
+    const filter = new Object();
+
+    if (q) filter.title = new RegExp(q, "i");
+
+    filter.user = req.user.sub;
+
+    //how many to skip
+    const p = Math.max(parseInt(page, 10), 1);
+    const l = Math.min(Math.max(parseInt(limit, 10), 1), 50);
+    const skip = (p - 1) * l;
+
+    //get the workouts and total workouts that match this criteria
+    const [workouts, total] = await Promise.all([
+      Workout.find(filter).sort({ createdAt: -1 }).limit(l).lean(),
+      Workout.countDocuments(filter),
+    ]);
+
+    res.status(200).json({ workouts, total, page: p, limit: l });
+  } catch (err) {
+    console.log(err);
+    return res.status(500).json({ message: "Internal server error" });
+  }
+};
+export { createWorkout, getWorkout, listWorkouts };

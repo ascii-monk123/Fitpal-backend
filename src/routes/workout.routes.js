@@ -1,6 +1,6 @@
 import {Router} from 'express';
 import requireAuth from '../middlware/auth.js';
-import { createWorkout, getWorkout} from '../controllers/workout.controller.js';
+import { createWorkout, getWorkout, listWorkouts} from '../controllers/workout.controller.js';
 
 //create the workout router
 const workout_router = Router();
@@ -10,7 +10,7 @@ const workout_router = Router();
 workout_router.post("/create", requireAuth, createWorkout);
 
 //list workouts
-workout_router.get("/", requireAuth, ()=>{});
+workout_router.get("/", requireAuth, listWorkouts);
 
 //update workout
 workout_router.patch("/:id", requireAuth, ()=>{});
