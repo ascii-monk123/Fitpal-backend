@@ -5,6 +5,7 @@ import morgan from 'morgan';
 import connectDB from './config/db.js';
 import auth_router from './routes/auth.routes.js';
 import exercise_router from './routes/exercise.routes.js';
+import workout_router from './routes/workout.routes.js';
 
 //setup env file
 dotenv.config('.env');
@@ -27,6 +28,9 @@ app.use("/api/v1/users", auth_router);
 
 //exercise
 app.use("/api/v1/exercises", exercise_router);
+
+//workout
+app.use("/api/v1/workouts", workout_router);
 
 
 //connection to database and listen for requests

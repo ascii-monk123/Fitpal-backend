@@ -13,4 +13,4 @@ user: {type:mongoose.Schema.Types.ObjectId, ref:"User", required:true}
 //indexing
 workoutSchema.index({user:1, status:1});
 
-export default workoutSchema;
+export default mongoose.model('Workout', workoutSchema);
