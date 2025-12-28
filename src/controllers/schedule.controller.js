@@ -167,8 +167,32 @@ const updateSchedule = async (req, res) => {
 };
 
 
+//function: delete schedule
+//route: DELETE /api/v1/schedules/:id
+const deleteSchedule = async (req, res) => {
+  try {
+    //get id
+    const id = req.params.id;
+
+    //id verify
+    if (!id || !mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(400).json({ message: "Invalid id" });
+    }
+
+    //delete the schedule
+    const schedule= await WorkoutSchedule.findOneAndDelete({ _id: id, user: req.user.sub });
+
+    if (!schedule) return res.status(404).json({ message: "Schedule not found" });
+
+    return res.status(200).json({ ok: true });
+  } catch (err) {
+    console.log(err);
+    return res.status(500).json({ message: "Server error" });
+  }
+};
+
  
-export { createWorkoutSchedule,listSchedules, getSchedule, updateSchedule};
+export { createWorkoutSchedule,listSchedules, getSchedule, updateSchedule, deleteSchedule};
 
 
 //crgard thesis done commitee member on vacation sof froms masla hai main phase 1 main defense dena chahta hu.
