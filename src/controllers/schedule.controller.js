@@ -117,8 +117,58 @@ const getSchedule = async (req, res) => {
    }
 };
 
+//function: to update schedule
+//route: PATCH /api/v1/schedules/:id
+const updateSchedule = async (req, res) => {
+  try {
+    //get the id
+    const id = req.params.id;
 
-export { createWorkoutSchedule,listSchedules, getSchedule};
+    //validify id
+    if (!id || !mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(400).json({ message: "Invalid input" });
+    }
+
+    //validify the input
+    const parsed = workoutScheduleSchema.partial().safeParse(req.body);
+
+    if (!parsed.success) {
+      return res.status(400).json({ message: "Invalid input" });
+    }
+   
+    //find workout valid
+    const data = parsed.data;
+    let validated = true;
+    if(data.workout){
+      validated = await validWorkout(data.workout, req, res);
+    }
+  
+    if (!validated)
+      return res
+        .status(400)
+        .json({ message: "Workout does not exist" });
+    //update
+    const schedule = await WorkoutSchedule.findOneAndUpdate(
+      { _id: id, user: req.user.sub },
+      data,
+      {
+        new: true,
+        runValidators: true,
+      }
+    );
+
+    if (!schedule) return res.status(403).json({ message: "Forbidden" });
+
+    return res.status(200).json(schedule);
+  } catch (err) {
+    console.log(err);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
+
+
+ 
+export { createWorkoutSchedule,listSchedules, getSchedule, updateSchedule};
 
 
 //crgard thesis done commitee member on vacation sof froms masla hai main phase 1 main defense dena chahta hu.

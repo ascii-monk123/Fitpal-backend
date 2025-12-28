@@ -1,6 +1,6 @@
 import {Router} from 'express';
 import requireAuth from '../middlware/auth.js';
-import { createWorkoutSchedule, listSchedules, getSchedule} from '../controllers/schedule.controller.js';
+import { createWorkoutSchedule, listSchedules, getSchedule, updateSchedule} from '../controllers/schedule.controller.js';
 
 
 const scheduleRouter = Router();
@@ -15,6 +15,9 @@ scheduleRouter.get("/list", requireAuth, listSchedules);
 
 //get a particular workout schedule
 scheduleRouter.get("/:id", requireAuth, getSchedule);
+
+//update schedule
+scheduleRouter.patch("/:id", requireAuth, updateSchedule);
 
 
 
