@@ -131,7 +131,7 @@ const listWorkouts = async (req, res) => {
 
     //get the workouts and total workouts that match this criteria
     const [workouts, total] = await Promise.all([
-      Workout.find(filter).sort({ createdAt: -1 }).limit(l).lean(),
+      Workout.find(filter).sort({ createdAt: -1 }).skip(skip).limit(l).lean(),
       Workout.countDocuments(filter),
     ]);
 
