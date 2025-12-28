@@ -13,6 +13,9 @@ scheduleRouter.post("/create", requireAuth, createWorkoutSchedule);
 //get list of schedules
 scheduleRouter.get("/list", requireAuth, listSchedules);
 
+//get a particular workout schedule
+scheduleRouter.get("/:id", requireAuth, getSchedule);
+
 
 
 export default scheduleRouter;
