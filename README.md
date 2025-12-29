@@ -143,3 +143,15 @@ The token contains:
 
 
 
+## 🛠️ TODO / Future Improvements
+
+- ⏳ Add comments/notes system for exercises  
+  > Allow users to attach personal comments, tips, or form cues to each exercise (e.g., “keep elbows tucked”, “slow negatives”).  
+  - Support create, edit, and delete comments  
+  - Link comments to both exercise templates and workout sessions  
+  - Expose via new API routes (e.g., `/api/v1/exercises/:id/comments`)  
+
+- 📊 Enhance reports with summaries  
+  - Weekly/monthly volume and PRs  
+  - Average RPE and duration trends  
+
