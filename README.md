@@ -93,4 +93,53 @@ The token contains:
 
 - Call protected routes
 
-### (Note): the server is still in development but users can access functionalities like auth, exercise creation, workout creation and workout scheduling for now.
+
+## 📚 API Routes
+
+### 🔐 Auth
+- login: POST /api/v1/users/login  
+- register: POST /api/v1/users/register  
+
+---
+
+### 🏋️ Exercises
+- create: POST /api/v1/exercises/create  
+- list: GET /api/v1/exercises/list  
+- get one: GET /api/v1/exercises/exercise/:id  
+- update: PATCH /api/v1/exercises/:id  
+- delete: DELETE /api/v1/exercises/:id  
+
+---
+
+### 📝 Workouts
+- create: POST /api/v1/workouts/create  
+- list: GET /api/v1/workouts  
+- get one: GET /api/v1/workouts/:id  
+- update: PATCH /api/v1/workouts/:id  
+- delete: DELETE /api/v1/workouts/:id  
+
+---
+
+### 📅 Schedules
+- create: POST /api/v1/schedules/create  
+- list: GET /api/v1/schedules/list  
+- get one: GET /api/v1/schedules/:id  
+- update: PATCH /api/v1/schedules/:id  
+- delete: DELETE /api/v1/schedules/:id  
+
+---
+
+### ⏱️ Workout Sessions
+- create: POST /api/v1/workout-sessions/create  
+- list: GET /api/v1/workout-sessions/list  
+- get one: GET /api/v1/workout-sessions/:id  
+- update: PATCH /api/v1/workout-sessions/:id  
+- delete: DELETE /api/v1/workout-sessions/:id  
+
+---
+
+### 📄 Reports
+- generate user workout report (PDF): GET /api/v1/users/report  
+
+
+
