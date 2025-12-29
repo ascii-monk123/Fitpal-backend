@@ -8,6 +8,7 @@ import exercise_router from './routes/exercise.routes.js';
 import workout_router from './routes/workout.routes.js';
 import scheduleRouter from './routes/schedule.routes.js';
 import workoutSessionRouter from './routes/wsession.routes.js';
+import reportRouter from './routes/report.route.js';
 
 //setup env file
 dotenv.config('.env');
@@ -39,6 +40,9 @@ app.use("/api/v1/schedules", scheduleRouter);
 
 //workout sessions
 app.use("/api/v1/workout-sessions", workoutSessionRouter);
+
+//report
+app.use("/api/v1/users/report", reportRouter);
 
 
 //connection to database and listen for requests
