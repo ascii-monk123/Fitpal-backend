@@ -3,6 +3,12 @@
 A RESTful backend API for a fitness/workout tracking app built with **Node.js, Express, MongoDB Atlas, JWT, and Zod**.
 Users can manage their own exercises, create workouts composed of multiple exercises, schedule workouts, log completed sessions, and add comments — all securely with JWT authentication.
 
+## 📌 Project Roadmap
+
+This project is inspired by the following roadmap:
+
+👉 https://roadmap.sh/projects/fitness-workout-tracker
+
 ---
 
 ## 🚀 Tech Stack
