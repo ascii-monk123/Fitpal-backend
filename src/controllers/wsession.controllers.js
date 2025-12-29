@@ -235,4 +235,29 @@ const listWorkoutSessions = async (req, res) => {
   }
 };
 
-export { createWorkoutSession, deleteSession,listWorkoutSessions};
+//function: get a workout session by id
+//route: GET /api/v1/workout-sessions/:id
+const getWorkoutSession = async (req, res) => {
+  try {
+    //get the id
+    const id = req.params.id;
+
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(400).json({ message: "Invalid id" });
+    }
+
+    //get the workout
+    const workout = await WorkoutSession.findOne({ _id: id, user: req.user.sub });
+
+    if (!workout) {
+      return res.status(404).json({ message: "Workout Session not found" });
+    }
+
+    return res.status(200).json(workout);
+  } catch (err) {
+    console.log(err);
+    return res.status(500).json({ message: "Server error" });
+  }
+};
+
+export { createWorkoutSession, deleteSession,listWorkoutSessions, getWorkoutSession};
