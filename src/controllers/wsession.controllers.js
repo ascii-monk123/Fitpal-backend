@@ -99,7 +99,7 @@ const verifySchWork = async (wId, sId, req, res) => {
     user: req.user.sub,
   });
 
-  if(!schedule) return false;
+  if (!schedule) return false;
 
   if (schedule.workout.equals(w)) return true;
 
@@ -176,31 +176,32 @@ const createWorkoutSession = async (req, res) => {
   }
 };
 
-
 //function: delete session
 //request: DELETE /api/v1/workout-sessions
-const deleteSession = async(req, res)=>{
-   try {
-       //get id
-       const id = req.params.id;
-   
-       //id verify
-       if (!id || !mongoose.Types.ObjectId.isValid(id)) {
-         return res.status(400).json({ message: "Invalid id" });
-       }
-   
-       //delete the session
-       const session = await WorkoutSession.findOneAndDelete({ _id: id, user: req.user.sub });
-   
-       if (!session) return res.status(404).json({ message: "Session not found" });
-   
-       return res.status(200).json({ ok: true });
-     } catch (err) {
-       console.log(err);
-       return res.status(500).json({ message: "Server error" });
-     }
-}
+const deleteSession = async (req, res) => {
+  try {
+    //get id
+    const id = req.params.id;
 
+    //id verify
+    if (!id || !mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(400).json({ message: "Invalid id" });
+    }
+
+    //delete the session
+    const session = await WorkoutSession.findOneAndDelete({
+      _id: id,
+      user: req.user.sub,
+    });
+
+    if (!session) return res.status(404).json({ message: "Session not found" });
+
+    return res.status(200).json({ ok: true });
+  } catch (err) {
+    console.log(err);
+    return res.status(500).json({ message: "Server error" });
+  }
+};
 
 //function:get a list of users sessions
 // GET: /api/v1/workout-sessions/list
@@ -224,7 +225,11 @@ const listWorkoutSessions = async (req, res) => {
 
     //get the workout session and total workout sessions that match this criteria
     const [workout_s, total] = await Promise.all([
-      WorkoutSession.find(filter).sort({ createdAt: -1 }).skip(skip).limit(l).lean(),
+      WorkoutSession.find(filter)
+        .sort({ createdAt: -1 })
+        .skip(skip)
+        .limit(l)
+        .lean(),
       WorkoutSession.countDocuments(filter),
     ]);
 
@@ -247,7 +252,10 @@ const getWorkoutSession = async (req, res) => {
     }
 
     //get the workout
-    const workout = await WorkoutSession.findOne({ _id: id, user: req.user.sub });
+    const workout = await WorkoutSession.findOne({
+      _id: id,
+      user: req.user.sub,
+    });
 
     if (!workout) {
       return res.status(404).json({ message: "Workout Session not found" });
@@ -260,4 +268,100 @@ const getWorkoutSession = async (req, res) => {
   }
 };
 
-export { createWorkoutSession, deleteSession,listWorkoutSessions, getWorkoutSession};
+//function: update workoutSession
+//request: PATCH /api/v1/workout-sessions/:id
+const updateWorkoutSession = async (req, res) => {
+  try {
+    //get the id
+    const id = req.params.id;
+
+    //validify id
+    if (!id || !mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(400).json({ message: "Invalid input" });
+    }
+
+    //validify the input
+    const parsed = workoutSessionSchema.partial().safeParse(req.body);
+
+    if (!parsed.success) {
+      return res.status(400).json({ message: "Invalid input" , errors: parsed.error.flatten()});
+    }
+
+    const data = parsed.data;
+
+    if (data.workout) {
+      //verify workout exists
+      const wExists = await verifyWorkout(data.workout, req, res);
+
+      if (!wExists)
+        return res
+          .status(400)
+          .json({ message: "Workout doesn't exist in the database" });
+    }
+    //verify schedule exists
+    if (data.schedule) {
+      const sExists = await verifySchedule(data.schedule, req, res);
+      if (!sExists)
+        return res
+          .status(400)
+          .json({ message: "Schedule doesn't exist in the database" });
+    }
+
+    // get current session
+    const current = await WorkoutSession.findOne({
+      _id: id,
+      user: req.user.sub,
+    });
+    if (!current)
+      return res.status(404).json({ message: "Workout session not found" });
+
+    // workout<->schedule consistency check
+    const finalWorkoutId = data.workout ?? String(current.workout);
+    const finalScheduleId =
+      data.schedule ?? (current.schedule ? String(current.schedule) : null);
+
+    if (finalScheduleId) {
+      const ok = await verifySchWork(finalWorkoutId, finalScheduleId, req, res);
+      if (!ok) {
+        return res
+          .status(400)
+          .json({ message: "Schedule workout and session workout mismatch!" });
+      }
+    }
+
+    if (data.exercises) {
+      //verify all exercises in the session exist
+      const exExists = await verifyExercises(data);
+
+      if (!exExists)
+        return res.status(400).json({
+          message: "One or more exercises don't exist in the database",
+        });
+    }
+
+    //update
+    const workout_s = await WorkoutSession.findOneAndUpdate(
+      { _id: id, user: req.user.sub },
+      data,
+      {
+        new: true,
+        runValidators: true,
+      }
+    );
+
+    if (!workout_s) return res.status(404).json({ message: "Forbidden" });
+
+    return res.status(200).json(workout_s);
+  } catch (err) {
+    console.log(err);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
+
+export {
+  createWorkoutSession,
+  deleteSession,
+  listWorkoutSessions,
+  getWorkoutSession,
+  updateWorkoutSession
+};
