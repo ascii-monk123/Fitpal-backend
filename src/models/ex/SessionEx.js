@@ -2,7 +2,7 @@ import mongoose from "mongoose";
 
 
 const sessionExSchema  = mongoose.Schema({
-    exerciseId: {type: mongoose.Schema.Types.ObjectId, ref:"Exercise"},
+    exerciseId: {type: mongoose.Schema.Types.ObjectId, ref:"Exercise", required:true},
     order: {type:Number, min:1, required:true},
     sets:{type:Number, min:1, max:50, required:true},
     reps:{type:Number, min:1, max:200, required:true},
