@@ -93,4 +93,4 @@ The token contains:
 
 - Call protected routes
 
-### (Note): the server is still in development but users can access functionalities like auth, exercise creation and workout creation for now.
+### (Note): the server is still in development but users can access functionalities like auth, exercise creation, workout creation and workout scheduling for now.
