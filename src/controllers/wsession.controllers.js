@@ -177,7 +177,8 @@ const createWorkoutSession = async (req, res) => {
 };
 
 
-//delete session
+//function: delete session
+//request: DELETE /api/v1/workout-sessions
 const deleteSession = async(req, res)=>{
    try {
        //get id
@@ -200,4 +201,38 @@ const deleteSession = async(req, res)=>{
      }
 }
 
-export { createWorkoutSession, deleteSession};
+
+//function:get a list of users sessions
+// GET: /api/v1/workout-sessions/list
+
+const listWorkoutSessions = async (req, res) => {
+  try {
+    //first get the query params
+    const { q, page = "1", limit = "10" } = req.query;
+
+    //filter object
+    const filter = new Object();
+
+    if (q) filter.title = new RegExp(q, "i");
+
+    filter.user = req.user.sub;
+
+    //how many to skip
+    const p = Math.max(parseInt(page, 10), 1);
+    const l = Math.min(Math.max(parseInt(limit, 10), 1), 50);
+    const skip = (p - 1) * l;
+
+    //get the workout session and total workout sessions that match this criteria
+    const [workout_s, total] = await Promise.all([
+      WorkoutSession.find(filter).sort({ createdAt: -1 }).skip(skip).limit(l).lean(),
+      WorkoutSession.countDocuments(filter),
+    ]);
+
+    res.status(200).json({ workout_s, total, page: p, limit: l });
+  } catch (err) {
+    console.log(err);
+    return res.status(500).json({ message: "Internal server error" });
+  }
+};
+
+export { createWorkoutSession, deleteSession,listWorkoutSessions};

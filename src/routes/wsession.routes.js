@@ -1,6 +1,6 @@
 import { Router } from "express";
 import requireAuth from "../middlware/auth.js";
-import { createWorkoutSession, deleteSession } from "../controllers/wsession.controllers.js";
+import { createWorkoutSession, deleteSession, listWorkoutSessions } from "../controllers/wsession.controllers.js";
 
 const workoutSessionRouter = Router();
 
@@ -17,7 +17,7 @@ workoutSessionRouter.patch("/:id",requireAuth,()=>{});
 workoutSessionRouter.delete("/:id", requireAuth, deleteSession);
 
 //get all workout sessions
-workoutSessionRouter.get("/list", requireAuth, ()=>{});
+workoutSessionRouter.get("/list", requireAuth, listWorkoutSessions);
 
 //get a particular workout session by id
 workoutSessionRouter.get("/:id", requireAuth, ()=>{});
