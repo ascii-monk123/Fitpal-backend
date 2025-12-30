@@ -87,7 +87,7 @@ The token contains:
 
 ### 🧪 Using Postman
 
-- Call /api/v1/auth/login or /api/v1/auth/register
+- Call /api/v1/users/login or /api/v1/users/register
 
 - Copy the token from response
 
